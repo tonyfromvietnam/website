@@ -1,28 +1,86 @@
 @import "tailwindcss";
 
-/* "Strategic Connector" palette · Modern Editorial Tech */
+/* "Strategic Connector" palette on a dark canvas · Modern Editorial Tech */
 @theme {
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --color-slate-deep: #0f172a;  /* text, dark surfaces */
-  --color-canvas: #f8fafc;      /* page background */
-  --color-line: #e2e8f0;        /* card borders */
-  --color-teal: #0d9488;        /* brand: graphics, rings, active lines */
-  --color-teal-ink: #0f766e;    /* brand on text and buttons (AA contrast on light) */
-  --color-mint: #10b981;        /* brand highlight */
-  --color-data: #0284c7;        /* data accent */
-  --color-amber: #f59e0b;       /* warm highlight: dots, bars, fills */
-  --color-amber-ink: #b45309;   /* amber on text (AA contrast on light) */
+  --color-night: #020617;      /* deepest background */
+  --color-slate-deep: #0f172a; /* base canvas */
+  --color-paper: #f8fafc;      /* main text */
+  --color-teal: #0d9488;       /* brand: fills, gradients */
+  --color-mint: #10b981;       /* brand highlight */
+  --color-mint-ink: #34d399;   /* brand on text (AA on dark) */
+  --color-data: #0284c7;       /* data accent: fills */
+  --color-data-ink: #38bdf8;   /* data on text (AA on dark) */
+  --color-amber: #f59e0b;      /* warm highlight */
 
   --radius-card: 12px;
 }
 
-:root { color-scheme: light; }
-html, body { background: var(--color-canvas); color: var(--color-slate-deep); }
+:root { color-scheme: dark; }
+html, body { background: var(--color-night); color: var(--color-paper); }
 h1, h2, h3 { text-wrap: balance; }
 .gutter {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Aurora: two soft blobs drifting behind the hero */
+.aurora {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+.aurora::before, .aurora::after {
+  content: ""; position: absolute; border-radius: 9999px; filter: blur(90px); opacity: 0.55;
+}
+.aurora::before {
+  width: 640px; height: 640px; left: -160px; top: -260px;
+  background: radial-gradient(circle, #0d9488 0%, transparent 70%);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.aurora::after {
+  width: 560px; height: 560px; right: -180px; top: 40px;
+  background: radial-gradient(circle, #0284c7 0%, transparent 70%);
+  animation: drift 22s ease-in-out infinite alternate-reverse;
+}
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(80px, 60px, 0) scale(1.15); }
+}
+
+/* Faint data grid that fades out towards the edges */
+.grid-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+}
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(90deg, #34d399, #2dd4bf 45%, #38bdf8);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Glass card with a gradient hairline border that brightens on hover */
+.glass {
+  position: relative; border-radius: var(--radius-card);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.55));
+  backdrop-filter: blur(14px);
+}
+.glass::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.35), rgba(148, 163, 184, 0.12) 40%, rgba(56, 189, 248, 0.3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  transition: opacity 300ms; opacity: 0.6;
+}
+.glass:hover::before { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora::before, .aurora::after { animation: none; }
 }

@@ -1,6 +1,7 @@
 // Everything personal lives here, so the pages stay generic.
 export const site = {
-  name: "", // TODO: your name for the header; the tagline leads until it's set
+  name: "Duy Chinh (Tony) Dinh",
+  shortName: "Tony Dinh",
   tagline: "Build the bridge you wished you'd had.",
   intro:
     "CRM analyst in London and Computer Science graduate. I build small, honest tools for the problems I actually have, starting with my own recovery.",
