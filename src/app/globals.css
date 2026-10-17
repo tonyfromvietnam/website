@@ -1,17 +1,27 @@
 @import "tailwindcss";
 
+/* "Strategic Connector" palette · Modern Editorial Tech */
 @theme {
-  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "IBM Plex Sans", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --color-ink: #0f172a;
-  --color-go: #22e58b;
-  --color-cyan: #22d3ee;
+
+  --color-slate-deep: #0f172a;  /* text, dark surfaces */
+  --color-canvas: #f8fafc;      /* page background */
+  --color-line: #e2e8f0;        /* card borders */
+  --color-teal: #0d9488;        /* brand: graphics, rings, active lines */
+  --color-teal-ink: #0f766e;    /* brand on text and buttons (AA contrast on light) */
+  --color-mint: #10b981;        /* brand highlight */
+  --color-data: #0284c7;        /* data accent */
+  --color-amber: #f59e0b;       /* warm highlight: dots, bars, fills */
+  --color-amber-ink: #b45309;   /* amber on text (AA contrast on light) */
+
+  --radius-card: 12px;
 }
 
-:root { color-scheme: dark; }
-html, body { background: var(--color-ink); color: #f1f5f9; }
-h1, h2 { text-wrap: balance; }
+:root { color-scheme: light; }
+html, body { background: var(--color-canvas); color: var(--color-slate-deep); }
+h1, h2, h3 { text-wrap: balance; }
 .gutter {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));

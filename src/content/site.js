@@ -5,6 +5,7 @@ export const site = {
   intro:
     "CRM analyst in London and Computer Science graduate. I build small, honest tools for the problems I actually have, starting with my own recovery.",
   links: [{ label: "GitHub", href: "https://github.com/tonyfromvietnam" }],
+  contact: "https://github.com/tonyfromvietnam", // swap for email or LinkedIn
 };
 
 export const projects = [
@@ -23,5 +24,11 @@ export const projects = [
       { title: "Direct", text: "Every direction says what to do and the number behind it, then the day's plan rewrites itself." },
     ],
     privacy: "Health data never leaves the phone. No server, no account.",
+    // Illustrative numbers for the preview card, not live data
+    preview: { score: 82, day: "High Output Day", metrics: [
+      { label: "HRV", value: "78", unit: "ms", tone: "data" },
+      { label: "Resting HR", value: "48", unit: "bpm", tone: "data" },
+      { label: "Sleep", value: "7.2", unit: "h", tone: "amber" },
+    ] },
   },
 ];
