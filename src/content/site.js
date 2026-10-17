@@ -16,7 +16,7 @@ export const projects = [
     kicker: "Recovery dashboard",
     summary:
       "Morning data from my strap becomes a recovery score, clear directions and an hour-by-hour plan, scored against my own 30-day baselines.",
-    href: "https://tonyfromvietnam.github.io/chinh-recovery/",
+    href: "/chinh-recovery",
     repo: "https://github.com/tonyfromvietnam/chinh-recovery",
     stack: ["React", "Tailwind", "Apple Health", "iOS Shortcuts"],
     steps: [
