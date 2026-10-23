@@ -4,6 +4,12 @@ const CHINH = "https://chinh-recovery.vercel.app";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // One address: the old vercel.app name sends visitors (and old links, hash included) to the custom domain
+  async redirects() {
+    return [
+      { source: "/:path*", has: [{ type: "host", value: "duychinhdinh.vercel.app" }], destination: "https://www.duychinhdinh.com/:path*", permanent: true },
+    ];
+  },
   async rewrites() {
     return [
       { source: "/chinh-recovery", destination: `${CHINH}/` },
