@@ -8,14 +8,15 @@ import Heartbeat from "@/components/Heartbeat";
 import Clock from "@/components/Clock";
 import YouTubePlayer from "@/components/YouTubePlayer";
 import TikTokPlayer from "@/components/TikTokPlayer";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 const Eyebrow = ({ children, className = "text-muted", ...rest }) => (
   <p className={`font-mono text-[11px] uppercase tracking-[0.14em] ${className}`} {...rest}>{children}</p>
 );
 const TONE = { data: "text-data", amber: "text-amber" };
 const STROKE = { data: "var(--color-data)", amber: "var(--color-amber)" };
-const primary = "inline-flex min-h-11 items-center gap-2 rounded-[4px] bg-mint px-5 font-semibold text-mint-deep shadow-[0_0_0_1px_rgba(47,240,160,0.4),0_8px_24px_-8px_rgba(47,240,160,0.55)] transition hover:-translate-y-px hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
-const secondary = "inline-flex min-h-11 items-center rounded-[4px] border border-edge bg-white/[0.02] px-5 font-semibold text-paper transition hover:-translate-y-px hover:border-mint/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
+const primary = "inline-flex min-h-11 items-center gap-2 rounded-[4px] bg-mint px-5 font-semibold text-mint-deep shadow-[0_8px_24px_-10px_var(--color-mint)] transition hover:-translate-y-px hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
+const secondary = "inline-flex min-h-11 items-center rounded-[4px] border border-edge bg-paper/[0.03] px-5 font-semibold text-paper transition hover:-translate-y-px hover:border-mint/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
 
 // One bento tile: reveal on scroll, cursor spotlight, border beam and tilt on hover, staggered by grid position
 function Tile({ className = "", delay = 0, children, as: Tag = "div", ...rest }) {
@@ -100,7 +101,7 @@ const SocialLinks =({ className = "" }) => (
   <ul className={`flex flex-wrap gap-2 ${className}`}>
     {socials.filter((s) => s.href).map((s) => (
       <li key={s.platform}>
-        <a href={s.href} aria-label={s.label} className="grid h-11 w-11 place-items-center rounded-[4px] border border-edge bg-white/[0.02] text-paper transition hover:-translate-y-0.5 hover:border-mint/60 hover:text-mint">
+        <a href={s.href} aria-label={s.label} className="grid h-11 w-11 place-items-center rounded-[4px] border border-edge bg-paper/[0.03] text-paper transition hover:-translate-y-0.5 hover:border-mint/60 hover:text-mint">
           <Icon name={s.platform} />
         </a>
       </li>
@@ -152,10 +153,11 @@ export default async function Home() {
             <span className="h-2 w-2 rounded-[2px] bg-mint" aria-hidden="true" />
             {brand}
           </a>
-          <div className="flex items-center gap-5 text-sm font-medium">
+          <div className="flex items-center gap-2 text-sm font-medium sm:gap-5">
             <a href="#body" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Body</a>
             <a href="#work" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Built</a>
-            <a href="#recent" className="inline-flex min-h-11 items-center text-muted hover:text-paper">Recently</a>
+            <a href="#recent" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Recently</a>
+            <ThemeSwitch fallback={site.theme || "sand"} />
             <a href={site.contact} className="inline-flex min-h-11 items-center rounded-[4px] bg-paper px-4 font-semibold text-night transition hover:bg-mint">Connect</a>
           </div>
         </nav>
@@ -271,14 +273,25 @@ export default async function Home() {
             <ThreadsCard key={t.url} post={t} delay={1 + i} />
           ))}
 
-          {/* TikTok */}
-          <div className="grid grid-cols-2 gap-3 col-span-2 sm:grid-cols-4 sm:gap-4 lg:col-span-12">
-            {tiktoks.map((v, i) => (
-              <div key={v.id} data-reveal style={{ "--delay": `${i * 70}ms` }}>
-                <TikTokPlayer item={v} handle={profile.tiktok} />
+          {/* TikTok: a header strip, then a swipeable row on phones and four up on desktop */}
+          <section aria-label="TikTok" className="col-span-2 lg:col-span-12">
+            <div className="mb-3 flex items-center justify-between gap-3 sm:mb-4" data-reveal>
+              <div className="flex items-baseline gap-3">
+                <h2 className="font-display text-2xl font-bold tracking-[-0.03em] text-paper">TikTok</h2>
+                <span className="font-mono text-xs text-muted">@{profile.tiktok}</span>
               </div>
-            ))}
-          </div>
+              {socials.find((s) => s.platform === "tiktok")?.href && (
+                <a href={socials.find((s) => s.platform === "tiktok").href} className={`${secondary} min-h-10 px-4 text-sm`}>Follow</a>
+              )}
+            </div>
+            <ul className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0">
+              {tiktoks.map((v, i) => (
+                <li key={v.id} data-reveal className="w-[64%] shrink-0 snap-start sm:w-auto" style={{ "--delay": `${i * 70}ms` }}>
+                  <TikTokPlayer item={v} handle={profile.tiktok} index={i + 1} />
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
       </main>
 

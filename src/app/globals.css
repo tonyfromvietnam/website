@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-/* "Night Instrument", sharpened: neutral near-black, hairline edges, tight corners, one electric mint */
+/* Tokens keep their original names (night = page, paper = main text, mint = accent) so every
+   utility stays the same; each theme below just swaps the values. Hairline edges, tight corners. */
 @theme {
   --font-sans: var(--font-geist), system-ui, sans-serif;
   --font-display: var(--font-geist), system-ui, sans-serif;
@@ -14,16 +15,47 @@
   --color-paper: #f4f6f8;     /* main text */
   --color-body: #b8bfc7;      /* body copy */
   --color-muted: #8a929c;     /* labels (AA on surface) */
-  --color-mint: #2ff0a0;      /* brand accent */
-  --color-mint-deep: #03140c; /* text on mint */
+  --color-mint: #2ff0a0;      /* accent */
+  --color-mint-deep: #03140c; /* text on accent */
   --color-data: #5ccbff;      /* data values */
   --color-amber: #ffb84d;     /* warm data value */
 
   --radius-card: 6px;
 }
 
-:root { color-scheme: dark; }
+/* Sand: warm beige paper, terracotta accent */
+:root[data-theme="sand"] {
+  color-scheme: light;
+  --color-night: #ece4d6; --color-surface: #f6f1e7; --color-cell: #ede5d6; --color-line: #ddd2bf; --color-edge: #d0c3ad;
+  --color-paper: #1d1a16; --color-body: #4a4339; --color-muted: #6c6355;
+  --color-mint: #b4471b; --color-mint-deep: #fff7ec; --color-data: #2e5d86; --color-amber: #8f560b;
+  --tile-hi: rgba(255, 255, 255, 0.8); --tile-lo: rgba(60, 40, 20, 0.06); --dot: 29, 26, 22;
+}
+/* Linen: pale beige, deep forest green */
+:root[data-theme="linen"] {
+  color-scheme: light;
+  --color-night: #e7e3d7; --color-surface: #f4f1e8; --color-cell: #eae6da; --color-line: #d9d3c3; --color-edge: #cbc4b1;
+  --color-paper: #1a1c17; --color-body: #454a3f; --color-muted: #666a5d;
+  --color-mint: #2f6b4a; --color-mint-deep: #f4f1e8; --color-data: #2e5a80; --color-amber: #8c5a0e;
+  --tile-hi: rgba(255, 255, 255, 0.8); --tile-lo: rgba(30, 40, 20, 0.06); --dot: 26, 28, 23;
+}
+/* Espresso: dark roast, beige-gold accent */
+:root[data-theme="espresso"] {
+  color-scheme: dark;
+  --color-night: #12100d; --color-surface: #1b1713; --color-cell: #15120f; --color-line: #29231c; --color-edge: #352d23;
+  --color-paper: #f2eadc; --color-body: #cdc2b0; --color-muted: #9d917f;
+  --color-mint: #e6c38e; --color-mint-deep: #1b140a; --color-data: #9fc8b5; --color-amber: #eba066;
+  --tile-hi: rgba(255, 240, 220, 0.05); --tile-lo: rgba(0, 0, 0, 0.6); --dot: 242, 234, 220;
+}
+/* Night: the original near-black and electric mint */
+:root[data-theme="night"] { color-scheme: dark; }
+
+:root { --tile-hi: rgba(255, 255, 255, 0.05); --tile-lo: rgba(0, 0, 0, 0.6); --dot: 255, 255, 255; }
 html, body { background: var(--color-night); color: var(--color-paper); }
+body { transition: background-color 400ms ease; }
+
+/* Theme switch: the new palette spreads out in a circle from the swatch that was tapped */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 body { text-rendering: optimizeLegibility; font-feature-settings: "ss01", "cv11"; }
 h1, h2, h3 { text-wrap: balance; }
 .gutter {
@@ -35,7 +67,7 @@ h1, h2, h3 { text-wrap: balance; }
 .tile {
   position: relative; isolation: isolate; border-radius: var(--radius-card);
   background: var(--color-surface); border: 1px solid var(--color-edge);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 0 rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 1px 0 var(--tile-hi), 0 1px 0 var(--tile-lo);
   transition: border-color 250ms, transform 250ms cubic-bezier(.2,.7,.2,1);
 }
 
@@ -43,7 +75,7 @@ h1, h2, h3 { text-wrap: balance; }
 @property --beam { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 .tile::before {
   content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; padding: 1px; pointer-events: none;
-  background: conic-gradient(from var(--beam), transparent 0deg, transparent 300deg, rgba(47, 240, 160, 0.9) 340deg, transparent 360deg);
+  background: conic-gradient(from var(--beam), transparent 0deg, transparent 300deg, var(--color-mint) 340deg, transparent 360deg);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
   opacity: 0; transition: opacity 300ms;
@@ -54,7 +86,7 @@ h1, h2, h3 { text-wrap: balance; }
 /* Cursor spotlight under the pointer */
 [data-spot]::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
-  background: radial-gradient(320px circle at var(--x, -999px) var(--y, -999px), rgba(47, 240, 160, 0.08), transparent 60%);
+  background: radial-gradient(320px circle at var(--x, -999px) var(--y, -999px), color-mix(in srgb, var(--color-mint) 9%, transparent), transparent 60%);
 }
 
 /* Heatmap cells carry their shade in --o so the reveal can animate to it */
@@ -65,6 +97,13 @@ h1, h2, h3 { text-wrap: balance; }
 /* Headline: words rise in one after another on load */
 .word { display: inline-block; animation: rise 800ms cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 70ms + 150ms); }
 @keyframes rise { from { opacity: 0; transform: translateY(0.45em); filter: blur(6px); } }
+
+/* TikTok poster: the sound-wave bars bounce while the tile is hovered */
+.wave { transform-origin: bottom; }
+.outline-num { color: transparent; -webkit-text-stroke: 1px var(--color-edge); transition: -webkit-text-stroke-color 400ms, transform 700ms; }
+.group\/tt:hover .outline-num { -webkit-text-stroke-color: color-mix(in srgb, var(--color-mint-deep) 35%, transparent); }
+.group\/tt:hover .wave { animation: wave 700ms ease-in-out infinite alternate; animation-delay: calc(var(--i) * -110ms); }
+@keyframes wave { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
 
 /* Live dot on the intro tile */
 @keyframes ping { 75%, 100% { transform: scale(2.4); opacity: 0; } }

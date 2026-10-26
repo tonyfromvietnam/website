@@ -1,7 +1,7 @@
 // Shared player chrome so YouTube and TikTok look like part of the site, not someone else's player
 export const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
-const btn = "grid h-11 w-11 shrink-0 place-items-center rounded-full text-paper transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-mint";
+const btn = "grid h-11 w-11 shrink-0 place-items-center rounded-full text-white transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-mint";
 const path = { play: "M8 5.5v13l11-6.5z", pause: "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" };
 
 export function PlayGlyph({ playing, className = "h-5 w-5" }) {
@@ -19,9 +19,9 @@ function SoundGlyph({ muted }) {
 
 export function Controls({ playing, muted, now, total, onToggle, onMute, onSeek, extra, compact }) {
   return (
-    <div className="flex items-center gap-1 bg-gradient-to-t from-night/90 via-night/60 to-transparent px-2 pb-2 pt-8">
+    <div className="flex items-center gap-1 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-2 pb-2 pt-8">
       <button type="button" className={btn} onClick={onToggle} aria-label={playing ? "Pause" : "Play"}><PlayGlyph playing={playing} /></button>
-      {!compact && <span className="w-24 shrink-0 font-mono text-xs tabular-nums text-paper/80">{fmt(now)} / {fmt(total || 0)}</span>}
+      {!compact && <span className="w-24 shrink-0 font-mono text-xs tabular-nums text-white/80">{fmt(now)} / {fmt(total || 0)}</span>}
       <input type="range" min="0" max={total || 1} step="0.1" value={Math.min(now, total || 1)} aria-label="Seek"
         onChange={(e) => onSeek(Number(e.target.value))}
         className="h-11 min-w-0 flex-1 cursor-pointer accent-[var(--color-mint)]" />

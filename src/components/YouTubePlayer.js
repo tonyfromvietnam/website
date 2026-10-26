@@ -57,14 +57,14 @@ export default function YouTubePlayer({ id, title, channel }) {
         <button type="button" onClick={() => (started ? toggle() : setStarted(true))} aria-label={`Play: ${title}`}
           className="absolute inset-0 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-mint">
           <img src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`} alt="" className={`h-full w-full object-cover transition duration-700 group-hover/yt:scale-[1.03] ${started ? "opacity-60" : ""}`} />
-          <span className="absolute inset-0 bg-gradient-to-t from-night via-night/20 to-transparent" />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
           <span className="absolute inset-0 grid place-items-center">
             <span className="grid h-16 w-16 place-items-center rounded-full bg-mint text-mint-deep shadow-[0_8px_40px_-6px_rgba(61,220,151,0.7)] transition group-hover/yt:scale-110"><PlayGlyph playing={false} className="ml-1 h-7 w-7" /></span>
           </span>
           {!started && (
             <span className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
               <span className="block font-mono text-[11px] uppercase tracking-[0.14em] text-mint">YouTube · {channel}</span>
-              <span className="mt-1.5 block font-display text-xl font-bold text-paper sm:text-2xl">{title}</span>
+              <span className="mt-1.5 block font-display text-xl font-bold text-white sm:text-2xl">{title}</span>
             </span>
           )}
         </button>
@@ -76,7 +76,7 @@ export default function YouTubePlayer({ id, title, channel }) {
       {started && (
         <div className={`absolute inset-x-0 bottom-0 transition ${playing ? "opacity-0 group-hover/yt:opacity-100 focus-within:opacity-100" : ""}`}>
           <Controls playing={playing} muted={muted} now={time.now} total={time.total} onToggle={toggle} onMute={mute} onSeek={seek}
-            extra={<button type="button" onClick={full} aria-label="Full screen" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-paper hover:bg-white/10">
+            extra={<button type="button" onClick={full} aria-label="Full screen" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-white hover:bg-white/15">
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
             </button>} />
         </div>

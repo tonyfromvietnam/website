@@ -5,7 +5,9 @@ export const site = {
   tagline: "Build the bridge you wished you'd had.",
   intro:
     "CRM analyst in London and Computer Science graduate. I build small, honest tools for the problems I actually have, starting with my own recovery.",
-  oneLiner: "CRM analyst · CS graduate · London. I build tools for my own problems.",
+  // Colour theme visitors see first: "sand" | "linen" | "espresso" | "night" (they can switch in the header)
+  theme: "sand",
+  oneLiner:"CRM analyst · CS graduate · London. I build tools for my own problems.",
   links: [{ label: "GitHub", href: "https://github.com/tonyfromvietnam" }],
   contact: "https://github.com/tonyfromvietnam", // swap for email or LinkedIn
 };

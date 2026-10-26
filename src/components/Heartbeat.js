@@ -6,13 +6,15 @@ import { useEffect, useRef } from "react";
 const g = (t, c, w, a) => a * Math.exp(-(((t - c) / w) ** 2));
 const ecg = (t) => g(t, 0.12, 0.035, 0.12) + g(t, 0.21, 0.012, -0.12) + g(t, 0.235, 0.013, 1) + g(t, 0.26, 0.014, -0.28) + g(t, 0.46, 0.06, 0.24);
 
-export default function Heartbeat({ bpm, color = "#5ccbff", beats = 3 }) {
+export default function Heartbeat({ bpm, beats = 3 }) {
   const ref = useRef(null);
   useEffect(() => {
     const canvas = ref.current, ctx = canvas.getContext("2d");
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const period = 60 / bpm;
-    let w = 0, h = 0, raf = 0, visible = false;
+    // Trace colour follows the theme's data colour
+    const hue = () => getComputedStyle(document.documentElement).getPropertyValue("--color-data").trim() || "#5ccbff";
+    let w = 0, h = 0, raf = 0, visible = false, color = hue();
 
     const size = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect();
@@ -55,7 +57,9 @@ export default function Heartbeat({ bpm, color = "#5ccbff", beats = 3 }) {
     io.observe(canvas);
     const ro = new ResizeObserver(() => { size(); draw(performance.now()); });
     ro.observe(canvas);
-    return () => { cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); };
-  }, [bpm, color, beats]);
+    const retheme = () => { color = hue(); draw(performance.now()); };
+    addEventListener("themechange", retheme);
+    return () => { cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); removeEventListener("themechange", retheme); };
+  }, [bpm, beats]);
   return <canvas ref={ref} aria-hidden="true" className="block h-12 w-full" />;
 }

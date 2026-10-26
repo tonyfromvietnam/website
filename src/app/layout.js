@@ -11,9 +11,14 @@ export const metadata = {
   description: site.intro,
 };
 
+// Runs before first paint so a returning visitor never sees the default theme flash
+const THEMES = ["sand", "linen", "espresso", "night"];
+const themeScript = `try{var t=localStorage.getItem("theme");if(${JSON.stringify(THEMES)}.indexOf(t)>-1)document.documentElement.dataset.theme=t}catch(e){}`;
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en-GB" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="en-GB" data-theme={site.theme || "sand"} className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
       <body className="min-h-screen font-sans antialiased">{children}</body>
     </html>
   );
