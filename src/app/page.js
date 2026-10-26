@@ -225,8 +225,9 @@ const Socials = ({ className = "" }) => (
 export default async function Home() {
   const brand = site.shortName || site.name || "Build the bridge";
   const [lead] = projects;
-  const pulled = await latestYouTube(youtubeChannelId);
-  const youtube = pulled.length ? pulled : media.youtube;
+  // A pinned video wins; otherwise show the channel's newest upload
+  const pinned = media.youtube.filter((v) => v.id);
+  const youtube = pinned.length ? pinned : await latestYouTube(youtubeChannelId);
   return (
     <div className="min-h-screen overflow-x-clip bg-night">
       <Effects />

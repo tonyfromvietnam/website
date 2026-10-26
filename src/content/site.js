@@ -12,28 +12,28 @@ export const site = {
 
 // Profile links: an empty href shows as a dashed "add link" chip until filled in
 export const socials = [
-  { platform: "youtube", label: "YouTube", href: "" },
-  { platform: "tiktok", label: "TikTok", href: "" },
-  { platform: "threads", label: "Threads", href: "" },
+  { platform: "youtube", label: "YouTube", href: "https://www.youtube.com/@DuyChinhDinh" },
+  { platform: "tiktok", label: "TikTok", href: "https://www.tiktok.com/@duychinhdinh" },
+  { platform: "threads", label: "Threads", href: "https://www.threads.com/@duychinhdinhh" },
   { platform: "github", label: "GitHub", href: "https://github.com/tonyfromvietnam" },
 ];
 
-// With a channel id (UC…), the newest video is pulled from YouTube's public feed every hour
-export const youtubeChannelId = "";
+// @DuyChinhDinh. With no pinned video below, the newest upload comes from the public feed hourly
+export const youtubeChannelId = "UCgY4LkpXig7NgdzH6zGgCqg";
 
 // Pinned posts, newest first. id: YouTube video id or TikTok video id; Threads uses the post URL.
 // An empty id/url shows a placeholder tile.
 export const media = {
-  youtube: [{ id: "", title: "Latest video" }],
+  youtube: [{ id: "J9Wb7HvOiLo", title: "DU HỌC ANH - SVUK CUP 2022 | Bradford" }],
   tiktok: [
-    { id: "", title: "TikTok" },
-    { id: "", title: "TikTok" },
-    { id: "", title: "TikTok" },
-    { id: "", title: "TikTok" },
+    { id: "7140951295875157253", title: "TikTok" },
+    { id: "7183247798597340422", title: "TikTok" },
+    { id: "7249487584005475611", title: "TikTok" },
+    { id: "7258577600979717403", title: "TikTok" },
   ],
   threads: [
-    { url: "", text: "Latest Threads post" },
-    { url: "", text: "Threads post" },
+    { url: "https://www.threads.com/@duychinhdinhh/post/Der2hopjCeM", text: "Tap to read on Threads" },
+    { url: "https://www.threads.com/@duychinhdinhh/post/DeSGk5dCXgI", text: "Tap to read on Threads" },
   ],
 };
 
