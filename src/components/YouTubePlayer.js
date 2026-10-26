@@ -49,7 +49,7 @@ export default function YouTubePlayer({ id, title, channel }) {
   const full = () => (document.fullscreenElement ? document.exitFullscreen() : wrap.current?.requestFullscreen?.());
 
   return (
-    <div ref={wrap} className="group/yt relative aspect-video w-full overflow-hidden bg-black">
+    <div ref={wrap} className="group/yt relative aspect-video w-full overflow-hidden bg-black lg:aspect-auto lg:h-full lg:min-h-[420px]">
       {started && <div className="absolute inset-0 [&>iframe]:pointer-events-none"><div ref={host} /></div>}
 
       {/* Poster: before the first play, and again whenever paused, so YouTube's pause screen never shows */}

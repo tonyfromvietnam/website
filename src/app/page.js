@@ -3,6 +3,8 @@ import { health } from "@/content/health";
 import { latestYouTube } from "@/lib/youtube";
 import { tiktokCards } from "@/lib/social";
 import Effects from "@/components/Effects";
+import DotGrid from "@/components/DotGrid";
+import Heartbeat from "@/components/Heartbeat";
 import Clock from "@/components/Clock";
 import YouTubePlayer from "@/components/YouTubePlayer";
 import TikTokPlayer from "@/components/TikTokPlayer";
@@ -12,14 +14,14 @@ const Eyebrow = ({ children, className = "text-muted", ...rest }) => (
 );
 const TONE = { data: "text-data", amber: "text-amber" };
 const STROKE = { data: "var(--color-data)", amber: "var(--color-amber)" };
-const primary = "inline-flex min-h-11 items-center rounded-lg bg-mint px-5 font-semibold text-mint-deep transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
-const secondary = "inline-flex min-h-11 items-center rounded-lg border border-[#2a3744] px-5 font-semibold text-paper transition hover:border-mint/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
+const primary = "inline-flex min-h-11 items-center gap-2 rounded-[4px] bg-mint px-5 font-semibold text-mint-deep shadow-[0_0_0_1px_rgba(47,240,160,0.4),0_8px_24px_-8px_rgba(47,240,160,0.55)] transition hover:-translate-y-px hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
+const secondary = "inline-flex min-h-11 items-center rounded-[4px] border border-edge bg-white/[0.02] px-5 font-semibold text-paper transition hover:-translate-y-px hover:border-mint/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
 
-// One bento tile: reveal on scroll, cursor spotlight, staggered by its place in the grid
+// One bento tile: reveal on scroll, cursor spotlight, border beam and tilt on hover, staggered by grid position
 function Tile({ className = "", delay = 0, children, as: Tag = "div", ...rest }) {
   return (
     <Tag data-reveal data-spot style={{ "--delay": `${delay * 70}ms` }}
-      className={`overflow-hidden rounded-[var(--radius-card)] border border-edge bg-surface ${className}`} {...rest}>
+      className={`tile overflow-hidden ${className}`} {...rest}>
       {children}
     </Tag>
   );
@@ -43,14 +45,24 @@ const Icon = ({ name, className = "h-5 w-5" }) => (
     strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[name]}</svg>
 );
 
-function Ring({ score, size = 188, stroke = 14 }) {
-  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
+// Score ring inside a dial of 60 ticks; ticks up to the score light up one after another
+function Ring({ score, size = 220, stroke = 12 }) {
+  const ticks = 60, outer = size / 2 - 1, r = outer - 16 - stroke / 2, c = 2 * Math.PI * r;
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90" aria-hidden="true">
+        {Array.from({ length: ticks }, (_, i) => {
+          const a = (i / ticks) * 2 * Math.PI, long = i % 5 === 0, inner = outer - (long ? 9 : 5);
+          return (
+            <line key={i} className={`tick ${i / ticks < score / 100 ? "on" : ""}`} style={{ "--i": i }}
+              x1={size / 2 + Math.cos(a) * inner} y1={size / 2 + Math.sin(a) * inner}
+              x2={size / 2 + Math.cos(a) * outer} y2={size / 2 + Math.sin(a) * outer}
+              stroke="var(--color-mint)" strokeWidth={long ? 1.6 : 1} />
+          );
+        })}
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-edge)" strokeWidth={stroke} />
         <circle className="arc" cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-mint)" strokeWidth={stroke}
-          strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)}
+          strokeLinecap="butt" strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)}
           style={{ "--full": c, "--off": c * (1 - score / 100) }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -71,11 +83,24 @@ function Spark({ values, tone }) {
   );
 }
 
-const SocialLinks = ({ className = "" }) => (
+// Bars that rise from the baseline, the last (today) in full colour
+function Bars({ values, tone }) {
+  const hi = Math.max(...values);
+  return (
+    <div className="flex h-9 items-end gap-1" aria-hidden="true">
+      {values.map((v, i) => (
+        <span key={i} className={`bar flex-1 ${tone === "amber" ? "bg-amber" : "bg-data"}`}
+          style={{ "--i": i, height: `${(v / hi) * 100}%`, opacity: i === values.length - 1 ? 1 : 0.35 }} />
+      ))}
+    </div>
+  );
+}
+
+const SocialLinks =({ className = "" }) => (
   <ul className={`flex flex-wrap gap-2 ${className}`}>
     {socials.filter((s) => s.href).map((s) => (
       <li key={s.platform}>
-        <a href={s.href} aria-label={s.label} className="grid h-11 w-11 place-items-center rounded-lg border border-[#2a3744] text-paper transition hover:-translate-y-0.5 hover:border-mint/60 hover:text-mint">
+        <a href={s.href} aria-label={s.label} className="grid h-11 w-11 place-items-center rounded-[4px] border border-edge bg-white/[0.02] text-paper transition hover:-translate-y-0.5 hover:border-mint/60 hover:text-mint">
           <Icon name={s.platform} />
         </a>
       </li>
@@ -87,7 +112,7 @@ function ThreadsCard({ post, delay }) {
   const when = new Date(`${post.date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   return (
     <Tile as="a" href={post.url} delay={delay}
-      className="group flex flex-col gap-4 p-5 transition hover:border-mint/40 focus-visible:outline-2 focus-visible:outline-mint">
+      className="group flex flex-col gap-4 p-5 hover:border-mint/40 focus-visible:outline-2 focus-visible:outline-mint col-span-2 sm:col-span-1 lg:col-span-4">
       <div className="flex items-center gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-mint to-data font-display text-sm font-bold text-mint-deep">{profile.initials}</span>
         <span className="min-w-0 flex-1 leading-tight">
@@ -118,7 +143,8 @@ export default async function Home() {
   const steps = [["sync", p.steps[0]], ["score", p.steps[1]], ["direct", p.steps[2]]];
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-night">
+    <div className="relative min-h-screen overflow-x-clip">
+      <DotGrid />
       <Effects />
       <header className="sticky top-0 z-20 border-b border-line bg-night/85 backdrop-blur-md">
         <nav className="gutter mx-auto flex h-16 max-w-6xl items-center justify-between gap-4">
@@ -130,24 +156,25 @@ export default async function Home() {
             <a href="#body" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Body</a>
             <a href="#work" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Built</a>
             <a href="#recent" className="inline-flex min-h-11 items-center text-muted hover:text-paper">Recently</a>
-            <a href={site.contact} className="inline-flex min-h-11 items-center rounded-lg bg-paper px-4 text-night hover:bg-white">Connect</a>
+            <a href={site.contact} className="inline-flex min-h-11 items-center rounded-[4px] bg-paper px-4 font-semibold text-night transition hover:bg-mint">Connect</a>
           </div>
         </nav>
       </header>
 
       <main id="top" className="gutter mx-auto max-w-6xl py-8 sm:py-12">
-        <div className="grid grid-flow-dense grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-12">
+        <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-12">
 
           {/* Intro */}
-          <Tile className="relative flex flex-col justify-between gap-10 p-7 sm:col-span-2 sm:p-10 lg:col-span-8 lg:row-span-2">
-            <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-mint/10 blur-3xl" aria-hidden="true" />
+          <Tile className="relative flex flex-col justify-between gap-10 p-7 col-span-2 sm:p-10 lg:col-span-8 lg:row-span-2">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5" aria-hidden="true"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint/70" /><span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-mint" /></span>
               <Eyebrow className="text-mint" data-scramble="">{site.name}</Eyebrow>
             </div>
             <div>
-              <h1 className="max-w-2xl font-display text-[44px] font-extrabold leading-[1.02] tracking-[-0.035em] text-paper sm:text-6xl lg:text-7xl">
-                {site.tagline.replace(/had\.$/, "")}<span className="text-mint">had.</span>
+              <h1 className="max-w-2xl font-display text-[44px] font-bold leading-[1] tracking-[-0.045em] text-paper sm:text-6xl lg:text-[76px]" aria-label={site.tagline}>
+                {site.tagline.split(" ").map((w, i, all) => (
+                  <span key={i} aria-hidden="true" className={`word ${i === all.length - 1 ? "text-mint" : ""}`} style={{ "--i": i }}>{w}{i < all.length - 1 ? " " : ""}</span>
+                ))}
               </h1>
               <p className="mt-5 max-w-lg text-lg text-body">{site.oneLiner}</p>
             </div>
@@ -158,10 +185,10 @@ export default async function Home() {
           </Tile>
 
           {/* Recovery */}
-          <Tile id="body" delay={1} className="flex scroll-mt-24 flex-col items-center justify-center gap-5 p-7 sm:col-span-2 lg:col-span-4 lg:row-span-2">
+          <Tile id="body" delay={1} className="flex scroll-mt-24 flex-col items-center justify-center gap-5 p-7 col-span-2 lg:col-span-4 lg:row-span-2">
             <Eyebrow>{example ? "Recovery · example" : "Recovery today"}</Eyebrow>
             <Ring score={today.score} />
-            <span className="rounded-full border border-mint/30 px-3 py-1 font-mono text-xs text-mint">{today.day}</span>
+            <span className="rounded-[3px] border border-mint/30 bg-mint/[0.06] px-2.5 py-1 font-mono text-xs uppercase tracking-[0.1em] text-mint">{today.day}</span>
           </Tile>
 
           {/* Vitals */}
@@ -170,11 +197,15 @@ export default async function Home() {
             return (
               <Tile key={m.label} delay={2 + i} className="p-5 lg:col-span-3">
                 <Eyebrow>{m.label}</Eyebrow>
-                <p className={`mt-2 font-mono text-4xl tabular-nums ${TONE[m.tone]}`}>
+                <p className={`mt-2 font-mono text-3xl tabular-nums sm:text-4xl ${TONE[m.tone]}`}>
                   <span data-count={now}>{now}</span><span className="ml-1 text-sm text-muted">{m.unit}</span>
                 </p>
-                <div className="mt-3"><Spark values={m.week} tone={m.tone} /></div>
-                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">7 days</p>
+                <div className="mt-3">
+                  {m.label === "Resting HR" ? <Heartbeat bpm={now} />
+                    : m.label === "Sleep" ? <Bars values={m.week} tone={m.tone} />
+                    : <Spark values={m.week} tone={m.tone} />}
+                </div>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">{m.label === "Resting HR" ? `Live · ${now} bpm` : "7 days"}</p>
               </Tile>
             );
           })}
@@ -184,19 +215,19 @@ export default async function Home() {
           </Tile>
 
           {/* Build */}
-          <Tile as="article" id="work" delay={0} className="flex scroll-mt-24 flex-col gap-7 p-7 sm:col-span-2 sm:p-8 lg:col-span-7">
+          <Tile as="article" id="work" delay={0} className="flex scroll-mt-24 flex-col gap-7 p-7 col-span-2 sm:p-8 lg:col-span-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <Eyebrow className="text-mint">Built · {p.kicker}</Eyebrow>
                 <h2 className="mt-2 font-display text-6xl font-extrabold tracking-[-0.04em] text-paper">{p.name}</h2>
               </div>
               <ul className="flex flex-wrap gap-2 sm:max-w-[16rem] sm:justify-end">
-                {p.stack.map((t) => <li key={t} className="rounded-md border border-data/25 px-2.5 py-1 font-mono text-xs text-data">{t}</li>)}
+                {p.stack.map((t) => <li key={t} className="rounded-[3px] border border-data/25 px-2.5 py-1 font-mono text-xs text-data">{t}</li>)}
               </ul>
             </div>
             <ol className="grid grid-cols-3 gap-3">
               {steps.map(([icon, s], i) => (
-                <li key={s.title} title={s.text} className="flex flex-col items-center gap-2 rounded-xl border border-edge bg-cell px-3 py-5 text-center">
+                <li key={s.title} title={s.text} className="flex flex-col items-center gap-2 rounded-[4px] border border-edge bg-cell px-3 py-5 text-center">
                   <span className="grid h-11 w-11 place-items-center rounded-full bg-mint/10 text-mint"><Icon name={icon} className="h-5 w-5" /></span>
                   <span className="font-mono text-[11px] text-muted">0{i + 1}</span>
                   <span className="font-display text-sm font-bold text-paper sm:text-base">{s.title}</span>
@@ -211,7 +242,7 @@ export default async function Home() {
           </Tile>
 
           {/* 30 days */}
-          <Tile delay={1} className="flex flex-col p-6 sm:col-span-2 lg:col-span-5">
+          <Tile delay={1} className="flex flex-col p-6 col-span-2 lg:col-span-5">
             <div className="flex items-baseline justify-between gap-3">
               <Eyebrow>Recovery · 30 days</Eyebrow>
               <p className="font-mono text-sm text-paper">avg <span data-count={avg}>{avg}</span>%</p>
@@ -219,8 +250,8 @@ export default async function Home() {
             <ol className="mt-5 grid grid-cols-10 gap-1.5" aria-label={`Daily recovery for 30 days, average ${avg}%`}>
               {last30.map((s, i) => (
                 <li key={i} title={`${i === last30.length - 1 ? "Today" : `${last30.length - 1 - i} days ago`}: ${s}%`}
-                  className="aspect-square rounded-[4px] bg-mint transition hover:scale-110"
-                  style={{ opacity: 0.12 + Math.max(0, (s - 45) / 45) * 0.88 }}>
+                  className="cell aspect-square rounded-[2px] bg-mint hover:outline hover:outline-1 hover:outline-offset-2 hover:outline-mint"
+                  style={{ "--i": i, "--o": 0.12 + Math.max(0, (s - 45) / 45) * 0.88 }}>
                   <span className="sr-only">{s}%</span>
                 </li>
               ))}
@@ -230,7 +261,7 @@ export default async function Home() {
 
           {/* YouTube */}
           {video && (
-            <Tile id="recent" delay={0} className="scroll-mt-24 sm:col-span-2 lg:col-span-8 lg:row-span-2">
+            <Tile id="recent" delay={0} className="scroll-mt-24 col-span-2 lg:col-span-8 lg:row-span-2 lg:flex">
               <YouTubePlayer id={video.id} title={video.title} channel={`@${profile.youtube}`} />
             </Tile>
           )}
@@ -241,7 +272,7 @@ export default async function Home() {
           ))}
 
           {/* TikTok */}
-          <div className="grid grid-cols-2 gap-3 sm:col-span-2 sm:grid-cols-4 sm:gap-4 lg:col-span-12">
+          <div className="grid grid-cols-2 gap-3 col-span-2 sm:grid-cols-4 sm:gap-4 lg:col-span-12">
             {tiktoks.map((v, i) => (
               <div key={v.id} data-reveal style={{ "--delay": `${i * 70}ms` }}>
                 <TikTokPlayer item={v} handle={profile.tiktok} />

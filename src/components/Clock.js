@@ -16,7 +16,7 @@ export default function Clock() {
   const [hh, mm, ss] = now ? time.format(now).split(":") : ["--", "--", "--"];
   return (
     <>
-      <p className="font-mono text-4xl tabular-nums text-paper" aria-live="off">
+      <p className="font-mono text-3xl tabular-nums text-paper sm:text-4xl" aria-live="off">
         {hh}<span className="animate-pulse text-muted">:</span>{mm}<span className="ml-1 text-lg text-muted">{ss}</span>
       </p>
       <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-muted">{now ? `${part(Number(hourOf.format(now)))} in London` : "London"}</p>

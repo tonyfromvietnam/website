@@ -16,6 +16,8 @@ function countUp(el) {
     if (t < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
+  // If frames stall (background tab, power saving), still land on the real number
+  setTimeout(() => { el.textContent = el.dataset.count; }, ms + 400);
 }
 
 function scramble(el) {
@@ -28,6 +30,7 @@ function scramble(el) {
     else el.textContent = text;
   };
   requestAnimationFrame(tick);
+  setTimeout(() => { el.textContent = text; }, ms + 400);
 }
 
 export default function Effects() {
@@ -49,15 +52,25 @@ export default function Effects() {
     }, { threshold: 0.15 });
     targets.forEach((el) => io.observe(el));
 
+    // Spotlight follows the pointer; tiles also tilt a few degrees towards it (mouse only)
+    let tilted = null;
+    const untilt = (el) => { if (el) el.style.transform = ""; };
     const spot = (ev) => {
       const card = ev.target.closest?.("[data-spot]");
+      if (card !== tilted) { untilt(tilted); tilted = null; }
       if (!card) return;
-      const r = card.getBoundingClientRect();
-      card.style.setProperty("--x", `${ev.clientX - r.left}px`);
-      card.style.setProperty("--y", `${ev.clientY - r.top}px`);
+      const r = card.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+      card.style.setProperty("--x", `${x}px`);
+      card.style.setProperty("--y", `${y}px`);
+      if (still || ev.pointerType !== "mouse" || !card.hasAttribute("data-shown") || card.querySelector("iframe")) return;
+      const rx = ((y / r.height) - 0.5) * -3, ry = ((x / r.width) - 0.5) * 3;
+      card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+      tilted = card;
     };
+    const leave = () => { untilt(tilted); tilted = null; };
     addEventListener("pointermove", spot, { passive: true });
-    return () => { clearTimeout(fallback); io.disconnect(); removeEventListener("pointermove", spot); };
+    document.addEventListener("pointerleave", leave);
+    return () => { clearTimeout(fallback); io.disconnect(); removeEventListener("pointermove", spot); document.removeEventListener("pointerleave", leave); };
   }, []);
   return null;
 }

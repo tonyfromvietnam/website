@@ -1,5 +1,10 @@
 import "./globals.css";
+import { Geist, Geist_Mono } from "next/font/google";
 import { site } from "@/content/site";
+
+// Self-hosted at build time: crisp, no layout shift, no request to Google on page view
+const sans = Geist({ subsets: ["latin", "latin-ext", "vietnamese"], variable: "--font-geist" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata = {
   title: site.name ? `${site.name} · ${site.tagline}` : site.tagline,
@@ -8,15 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en-GB">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
-        />
-      </head>
+    <html lang="en-GB" className={`${sans.variable} ${mono.variable}`}>
       <body className="min-h-screen font-sans antialiased">{children}</body>
     </html>
   );
