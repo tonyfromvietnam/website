@@ -1,17 +1,29 @@
-import { site, projects, socials, media, youtubeChannelId } from "@/content/site";
+import { site, projects, socials, media, profile, youtubeChannelId } from "@/content/site";
 import { health } from "@/content/health";
 import { latestYouTube } from "@/lib/youtube";
+import { tiktokCards } from "@/lib/social";
 import Effects from "@/components/Effects";
-import Embed from "@/components/Embed";
+import Clock from "@/components/Clock";
+import YouTubePlayer from "@/components/YouTubePlayer";
+import TikTokPlayer from "@/components/TikTokPlayer";
 
 const Eyebrow = ({ children, className = "text-muted", ...rest }) => (
-  <p className={`font-mono text-xs uppercase tracking-[0.14em] ${className}`} {...rest}>{children}</p>
+  <p className={`font-mono text-[11px] uppercase tracking-[0.14em] ${className}`} {...rest}>{children}</p>
 );
 const TONE = { data: "text-data", amber: "text-amber" };
 const STROKE = { data: "var(--color-data)", amber: "var(--color-amber)" };
-const card = "rounded-[var(--radius-card)] border border-edge bg-surface";
 const primary = "inline-flex min-h-11 items-center rounded-lg bg-mint px-5 font-semibold text-mint-deep transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
 const secondary = "inline-flex min-h-11 items-center rounded-lg border border-[#2a3744] px-5 font-semibold text-paper transition hover:border-mint/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint";
+
+// One bento tile: reveal on scroll, cursor spotlight, staggered by its place in the grid
+function Tile({ className = "", delay = 0, children, as: Tag = "div", ...rest }) {
+  return (
+    <Tag data-reveal data-spot style={{ "--delay": `${delay * 70}ms` }}
+      className={`overflow-hidden rounded-[var(--radius-card)] border border-edge bg-surface ${className}`} {...rest}>
+      {children}
+    </Tag>
+  );
+}
 
 // Stroke icons, drawn on a 24px grid
 const ICONS = {
@@ -22,13 +34,16 @@ const ICONS = {
   sync: <><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.6M20 4v4.6h-4.6" /><path d="M20 12a8 8 0 0 1-13.7 5.7L4 15.4M4 20v-4.6h4.6" /></>,
   score: <><path d="M4 16a8 8 0 1 1 16 0" /><path d="M12 16l4-5" /></>,
   direct: <><path d="M5 12h13M13 6l6 6-6 6" /></>,
+  heart: <><path d="M12 20s-7.5-4.6-7.5-10A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7.5 3c0 5.4-7.5 10-7.5 10z" /></>,
+  reply: <><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z" /></>,
+  out: <><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></>,
 };
 const Icon = ({ name, className = "h-5 w-5" }) => (
   <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8"
     strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[name]}</svg>
 );
 
-function Ring({ score, size = 200, stroke = 14 }) {
+function Ring({ score, size = 188, stroke = 14 }) {
   const r = (size - stroke) / 2, c = 2 * Math.PI * r;
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
@@ -56,178 +71,52 @@ function Spark({ values, tone }) {
   );
 }
 
-function Health() {
-  const { today, last30, metrics, example, updated } = health;
-  const avg = Math.round(last30.reduce((a, b) => a + b, 0) / last30.length);
-  return (
-    <section id="body" aria-label="Health" className="gutter mx-auto max-w-6xl scroll-mt-16 py-20 sm:py-24">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="font-display text-4xl font-extrabold tracking-[-0.03em] text-paper sm:text-5xl" data-reveal>Body, today</h2>
-        <Eyebrow>{example ? "Example data" : `Updated ${updated}`} · via CHINH</Eyebrow>
-      </div>
-
-      <div className="mt-10 grid gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div className={`${card} flex flex-col items-center justify-center gap-5 p-8`} data-reveal data-spot>
-          <Ring score={today.score} />
-          <span className="rounded-full border border-mint/30 px-3 py-1 font-mono text-xs text-mint">{today.day}</span>
-        </div>
-
-        <div className="grid gap-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {metrics.map((m, i) => {
-              const now = m.week.at(-1);
-              return (
-                <div key={m.label} className={`${card} p-5`} data-reveal data-spot style={{ "--delay": `${i * 90}ms` }}>
-                  <Eyebrow className="text-[11px] text-muted">{m.label}</Eyebrow>
-                  <p className={`mt-2 font-mono text-4xl tabular-nums ${TONE[m.tone]}`}>
-                    <span data-count={now}>{now}</span><span className="ml-1 text-sm text-muted">{m.unit}</span>
-                  </p>
-                  <div className="mt-3"><Spark values={m.week} tone={m.tone} /></div>
-                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">7 days</p>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className={`${card} p-5`} data-reveal data-spot style={{ "--delay": "270ms" }}>
-            <div className="flex items-baseline justify-between gap-3">
-              <Eyebrow className="text-[11px] text-muted">Recovery · 30 days</Eyebrow>
-              <p className="font-mono text-sm text-paper">avg <span data-count={avg}>{avg}</span>%</p>
-            </div>
-            <ol className="mt-4 grid grid-cols-10 gap-1.5 sm:grid-cols-15" aria-label={`Daily recovery for 30 days, average ${avg}%`}>
-              {last30.map((s, i) => (
-                <li key={i} title={`${30 - i === 1 ? "Today" : `${30 - i - 1} days ago`}: ${s}%`}
-                  className="aspect-square rounded-[4px] bg-mint transition hover:scale-110"
-                  style={{ opacity: 0.12 + Math.max(0, (s - 45) / 45) * 0.88 }}>
-                  <span className="sr-only">{s}%</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Work({ p }) {
-  const steps = [["sync", p.steps[0]], ["score", p.steps[1]], ["direct", p.steps[2]]];
-  return (
-    <section id="work" aria-label="Work" className="scroll-mt-16 border-t border-line">
-      <div className="gutter mx-auto max-w-6xl py-20 sm:py-24">
-        <h2 className="font-display text-4xl font-extrabold tracking-[-0.03em] text-paper sm:text-5xl" data-reveal>Built</h2>
-        <article id={p.slug} className={`${card} mt-10 grid gap-10 p-6 sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center`} data-reveal data-spot>
-          <div className="min-w-0">
-            <Eyebrow className="text-mint">{p.kicker}</Eyebrow>
-            <h3 className="mt-3 font-display text-6xl font-extrabold tracking-[-0.04em] text-paper sm:text-7xl">{p.name}</h3>
-            <ul className="mt-6 flex flex-wrap gap-2">
-              {p.stack.map((t) => (
-                <li key={t} className="rounded-md border border-data/25 px-2.5 py-1 font-mono text-xs text-data">{t}</li>
-              ))}
-            </ul>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href={p.href} className={primary}>Open the app</a>
-              <a href={p.repo} className={secondary}>See how it's built</a>
-            </div>
-          </div>
-          <ol className="grid grid-cols-3 gap-3 sm:gap-4">
-            {steps.map(([icon, s], i) => (
-              <li key={s.title} title={s.text} className="flex flex-col items-center gap-3 rounded-xl border border-edge bg-cell px-4 py-6 text-center sm:px-7">
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-mint/10 text-mint"><Icon name={icon} className="h-6 w-6" /></span>
-                <span className="font-mono text-xs text-muted">0{i + 1}</span>
-                <span className="font-display text-base font-bold text-paper">{s.title}</span>
-              </li>
-            ))}
-          </ol>
-        </article>
-        <p className="mt-4 font-mono text-xs text-muted">{p.privacy}</p>
-      </div>
-    </section>
-  );
-}
-
-const Placeholder = ({ platform, className = "" }) => (
-  <div className={`${className} flex flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] border border-dashed border-[#2a3744] text-muted`}>
-    <Icon name={platform} className="h-7 w-7" />
-    <span className="font-mono text-[11px] uppercase tracking-[0.14em]">Add in site.js</span>
-  </div>
-);
-
-function Feed({ youtube }) {
-  const [video] = youtube;
-  return (
-    <section id="recent" aria-label="Recent posts" className="scroll-mt-16 border-t border-line">
-      <div className="gutter mx-auto max-w-6xl py-20 sm:py-24">
-        <h2 className="font-display text-4xl font-extrabold tracking-[-0.03em] text-paper sm:text-5xl" data-reveal>Recently</h2>
-
-        <div className="mt-10 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <div data-reveal>
-            {video?.id ? (
-              <Embed platform="youtube" item={video} label={`YouTube video: ${video.title}`} className="relative block aspect-video w-full overflow-hidden rounded-[var(--radius-card)] border border-edge">
-                <img src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
-                <span className="absolute inset-0 grid place-items-center bg-night/30">
-                  <span className="grid h-16 w-16 place-items-center rounded-full bg-mint text-mint-deep transition group-hover:scale-110"><Icon name="youtube" className="h-7 w-7" /></span>
-                </span>
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 to-transparent p-4 font-semibold text-paper">{video.title}</span>
-              </Embed>
-            ) : <Placeholder platform="youtube" className="aspect-video w-full" />}
-          </div>
-
-          <div className="grid gap-4">
-            {media.threads.map((t, i) => (
-              <div key={i} data-reveal style={{ "--delay": `${(i + 1) * 90}ms` }}>
-                {t.url ? (
-                  <Embed platform="threads" item={t} label={`Threads post: ${t.text}`} className={`${card} flex h-full min-h-36 w-full flex-col justify-between gap-4 p-5`}>
-                    <span className="flex items-center gap-2 text-muted"><Icon name="threads" /><span className="font-mono text-xs uppercase tracking-[0.14em]">Threads</span></span>
-                    <span className="line-clamp-3 text-lg font-medium text-paper">{t.text}</span>
-                  </Embed>
-                ) : <Placeholder platform="threads" className="h-full min-h-36" />}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {media.tiktok.map((v, i) => (
-            <li key={i} data-reveal style={{ "--delay": `${i * 90}ms` }}>
-              {v.id ? (
-                <Embed platform="tiktok" item={v} label={`TikTok video: ${v.title}`} className={`${card} relative grid aspect-[9/16] w-full place-items-center overflow-hidden`}>
-                  <span className="grid h-14 w-14 place-items-center rounded-full bg-paper/10 text-paper transition group-hover:scale-110 group-hover:bg-mint group-hover:text-mint-deep"><Icon name="tiktok" className="h-6 w-6" /></span>
-                  <span className="absolute inset-x-0 bottom-0 p-4 text-sm font-medium text-paper">{v.title}</span>
-                </Embed>
-              ) : <Placeholder platform="tiktok" className="aspect-[9/16] w-full" />}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-const Socials = ({ className = "" }) => (
+const SocialLinks = ({ className = "" }) => (
   <ul className={`flex flex-wrap gap-2 ${className}`}>
-    {socials.map((s) => (
+    {socials.filter((s) => s.href).map((s) => (
       <li key={s.platform}>
-        {s.href ? (
-          <a href={s.href} aria-label={s.label} className="grid h-11 w-11 place-items-center rounded-lg border border-[#2a3744] text-paper transition hover:-translate-y-0.5 hover:border-mint/60 hover:text-mint">
-            <Icon name={s.platform} />
-          </a>
-        ) : (
-          <span title={`Add your ${s.label} link in site.js`} className="grid h-11 w-11 place-items-center rounded-lg border border-dashed border-[#2a3744] text-muted">
-            <Icon name={s.platform} /><span className="sr-only">{s.label} (link not set)</span>
-          </span>
-        )}
+        <a href={s.href} aria-label={s.label} className="grid h-11 w-11 place-items-center rounded-lg border border-[#2a3744] text-paper transition hover:-translate-y-0.5 hover:border-mint/60 hover:text-mint">
+          <Icon name={s.platform} />
+        </a>
       </li>
     ))}
   </ul>
 );
 
+function ThreadsCard({ post, delay }) {
+  const when = new Date(`${post.date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return (
+    <Tile as="a" href={post.url} delay={delay}
+      className="group flex flex-col gap-4 p-5 transition hover:border-mint/40 focus-visible:outline-2 focus-visible:outline-mint">
+      <div className="flex items-center gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-mint to-data font-display text-sm font-bold text-mint-deep">{profile.initials}</span>
+        <span className="min-w-0 flex-1 leading-tight">
+          <span className="block truncate font-semibold text-paper">{profile.display}</span>
+          <span className="block truncate font-mono text-xs text-muted">@{profile.threads} · {when}</span>
+        </span>
+        <Icon name="threads" className="h-5 w-5 text-muted transition group-hover:text-paper" />
+      </div>
+      <p lang="vi" className="line-clamp-5 whitespace-pre-line text-[15px] leading-relaxed text-body">{post.text}</p>
+      <div className="mt-auto flex items-center gap-5 font-mono text-xs text-muted">
+        <span className="flex items-center gap-1.5"><Icon name="heart" className="h-4 w-4" />{post.likes}</span>
+        <span className="flex items-center gap-1.5"><Icon name="reply" className="h-4 w-4" />{post.replies}</span>
+        <span className="ml-auto flex items-center gap-1 text-mint opacity-0 transition group-hover:opacity-100">Read on Threads<Icon name="out" className="h-3.5 w-3.5" /></span>
+      </div>
+    </Tile>
+  );
+}
+
 export default async function Home() {
   const brand = site.shortName || site.name || "Build the bridge";
-  const [lead] = projects;
+  const [p] = projects;
+  const { today, last30, metrics, example, updated } = health;
+  const avg = Math.round(last30.reduce((a, b) => a + b, 0) / last30.length);
   // A pinned video wins; otherwise show the channel's newest upload
   const pinned = media.youtube.filter((v) => v.id);
-  const youtube = pinned.length ? pinned : await latestYouTube(youtubeChannelId);
+  const [video] = pinned.length ? pinned : await latestYouTube(youtubeChannelId);
+  const tiktoks = await tiktokCards(media.tiktok.filter((v) => v.id), profile.tiktok);
+  const steps = [["sync", p.steps[0]], ["score", p.steps[1]], ["direct", p.steps[2]]];
+
   return (
     <div className="min-h-screen overflow-x-clip bg-night">
       <Effects />
@@ -246,29 +135,127 @@ export default async function Home() {
         </nav>
       </header>
 
-      <main id="top">
-        <section className="gutter mx-auto max-w-6xl py-20 sm:py-28">
-          <Eyebrow data-scramble="">{site.name}</Eyebrow>
-          <h1 className="mt-5 max-w-4xl font-display text-5xl font-extrabold leading-[1.02] tracking-[-0.035em] text-paper sm:text-7xl lg:text-[96px]" data-reveal>
-            {site.tagline.replace(/had\.$/, "")}<span className="text-mint">had.</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-lg text-body" data-reveal style={{ "--delay": "120ms" }}>{site.oneLiner}</p>
-          <div className="mt-9 flex flex-wrap items-center gap-4" data-reveal style={{ "--delay": "220ms" }}>
-            <a href="#work" className={primary}>See what I've built</a>
-            <Socials />
-          </div>
-        </section>
+      <main id="top" className="gutter mx-auto max-w-6xl py-8 sm:py-12">
+        <div className="grid grid-flow-dense grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-12">
 
-        <Health />
-        {lead && <Work p={lead} />}
-        <Feed youtube={youtube} />
+          {/* Intro */}
+          <Tile className="relative flex flex-col justify-between gap-10 p-7 sm:col-span-2 sm:p-10 lg:col-span-8 lg:row-span-2">
+            <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-mint/10 blur-3xl" aria-hidden="true" />
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5" aria-hidden="true"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint/70" /><span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-mint" /></span>
+              <Eyebrow className="text-mint" data-scramble="">{site.name}</Eyebrow>
+            </div>
+            <div>
+              <h1 className="max-w-2xl font-display text-[44px] font-extrabold leading-[1.02] tracking-[-0.035em] text-paper sm:text-6xl lg:text-7xl">
+                {site.tagline.replace(/had\.$/, "")}<span className="text-mint">had.</span>
+              </h1>
+              <p className="mt-5 max-w-lg text-lg text-body">{site.oneLiner}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <a href="#work" className={primary}>See what I've built</a>
+              <SocialLinks />
+            </div>
+          </Tile>
+
+          {/* Recovery */}
+          <Tile id="body" delay={1} className="flex scroll-mt-24 flex-col items-center justify-center gap-5 p-7 sm:col-span-2 lg:col-span-4 lg:row-span-2">
+            <Eyebrow>{example ? "Recovery · example" : "Recovery today"}</Eyebrow>
+            <Ring score={today.score} />
+            <span className="rounded-full border border-mint/30 px-3 py-1 font-mono text-xs text-mint">{today.day}</span>
+          </Tile>
+
+          {/* Vitals */}
+          {metrics.map((m, i) => {
+            const now = m.week.at(-1);
+            return (
+              <Tile key={m.label} delay={2 + i} className="p-5 lg:col-span-3">
+                <Eyebrow>{m.label}</Eyebrow>
+                <p className={`mt-2 font-mono text-4xl tabular-nums ${TONE[m.tone]}`}>
+                  <span data-count={now}>{now}</span><span className="ml-1 text-sm text-muted">{m.unit}</span>
+                </p>
+                <div className="mt-3"><Spark values={m.week} tone={m.tone} /></div>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">7 days</p>
+              </Tile>
+            );
+          })}
+          <Tile delay={5} className="flex flex-col justify-between p-5 lg:col-span-3">
+            <Eyebrow>Local time</Eyebrow>
+            <div className="mt-4"><Clock /></div>
+          </Tile>
+
+          {/* Build */}
+          <Tile as="article" id="work" delay={0} className="flex scroll-mt-24 flex-col gap-7 p-7 sm:col-span-2 sm:p-8 lg:col-span-7">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <Eyebrow className="text-mint">Built · {p.kicker}</Eyebrow>
+                <h2 className="mt-2 font-display text-6xl font-extrabold tracking-[-0.04em] text-paper">{p.name}</h2>
+              </div>
+              <ul className="flex flex-wrap gap-2 sm:max-w-[16rem] sm:justify-end">
+                {p.stack.map((t) => <li key={t} className="rounded-md border border-data/25 px-2.5 py-1 font-mono text-xs text-data">{t}</li>)}
+              </ul>
+            </div>
+            <ol className="grid grid-cols-3 gap-3">
+              {steps.map(([icon, s], i) => (
+                <li key={s.title} title={s.text} className="flex flex-col items-center gap-2 rounded-xl border border-edge bg-cell px-3 py-5 text-center">
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-mint/10 text-mint"><Icon name={icon} className="h-5 w-5" /></span>
+                  <span className="font-mono text-[11px] text-muted">0{i + 1}</span>
+                  <span className="font-display text-sm font-bold text-paper sm:text-base">{s.title}</span>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-auto flex flex-wrap items-center gap-3">
+              <a href={p.href} className={primary}>Open the app</a>
+              <a href={p.repo} className={secondary}>See how it's built</a>
+              <span className="font-mono text-[11px] text-muted">{p.privacy}</span>
+            </div>
+          </Tile>
+
+          {/* 30 days */}
+          <Tile delay={1} className="flex flex-col p-6 sm:col-span-2 lg:col-span-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <Eyebrow>Recovery · 30 days</Eyebrow>
+              <p className="font-mono text-sm text-paper">avg <span data-count={avg}>{avg}</span>%</p>
+            </div>
+            <ol className="mt-5 grid grid-cols-10 gap-1.5" aria-label={`Daily recovery for 30 days, average ${avg}%`}>
+              {last30.map((s, i) => (
+                <li key={i} title={`${i === last30.length - 1 ? "Today" : `${last30.length - 1 - i} days ago`}: ${s}%`}
+                  className="aspect-square rounded-[4px] bg-mint transition hover:scale-110"
+                  style={{ opacity: 0.12 + Math.max(0, (s - 45) / 45) * 0.88 }}>
+                  <span className="sr-only">{s}%</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-auto pt-5 font-mono text-[11px] text-muted">{example ? "Example data" : `Updated ${updated}`} · via CHINH</p>
+          </Tile>
+
+          {/* YouTube */}
+          {video && (
+            <Tile id="recent" delay={0} className="scroll-mt-24 sm:col-span-2 lg:col-span-8 lg:row-span-2">
+              <YouTubePlayer id={video.id} title={video.title} channel={`@${profile.youtube}`} />
+            </Tile>
+          )}
+
+          {/* Threads */}
+          {media.threads.filter((t) => t.url).map((t, i) => (
+            <ThreadsCard key={t.url} post={t} delay={1 + i} />
+          ))}
+
+          {/* TikTok */}
+          <div className="grid grid-cols-2 gap-3 sm:col-span-2 sm:grid-cols-4 sm:gap-4 lg:col-span-12">
+            {tiktoks.map((v, i) => (
+              <div key={v.id} data-reveal style={{ "--delay": `${i * 70}ms` }}>
+                <TikTokPlayer item={v} handle={profile.tiktok} />
+              </div>
+            ))}
+          </div>
+        </div>
       </main>
 
       <footer className="border-t border-line">
-        <div className="gutter mx-auto flex max-w-6xl flex-col gap-6 py-16 sm:flex-row sm:items-end sm:justify-between">
+        <div className="gutter mx-auto flex max-w-6xl flex-col gap-6 py-14 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="font-display text-2xl font-bold text-paper sm:text-[26px]">{site.tagline}</p>
-            <Socials className="mt-5" />
+            <SocialLinks className="mt-5" />
           </div>
           <p className="font-mono text-xs text-muted">© {new Date().getFullYear()} {brand} · London</p>
         </div>

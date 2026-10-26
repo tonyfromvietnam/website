@@ -21,21 +21,32 @@ export const socials = [
 // @DuyChinhDinh. With no pinned video below, the newest upload comes from the public feed hourly
 export const youtubeChannelId = "UCgY4LkpXig7NgdzH6zGgCqg";
 
-// Pinned posts, newest first. id: YouTube video id or TikTok video id; Threads uses the post URL.
-// An empty id/url shows a placeholder tile.
+// Pinned posts, newest first. Everything shows in the site's own cards; the players load only on tap.
+// TikTok: caption is optional (TikTok's own caption fills in when blank); likes are copied by hand.
+// Threads has no public API for post text, so text, date and counts are copied by hand.
 export const media = {
   youtube: [{ id: "J9Wb7HvOiLo", title: "DU HỌC ANH - SVUK CUP 2022 | Bradford" }],
   tiktok: [
-    { id: "7140951295875157253", title: "TikTok" },
-    { id: "7183247798597340422", title: "TikTok" },
-    { id: "7249487584005475611", title: "TikTok" },
-    { id: "7258577600979717403", title: "TikTok" },
+    { id: "7140951295875157253", caption: "“Một ngày” làm thêm của du học sinh Anh Quốc", likes: "391" },
+    { id: "7183247798597340422", caption: "Phòng trọ của du học sinh Anh Quốc", likes: "233" },
+    { id: "7249487584005475611", caption: "", likes: "" },
+    { id: "7258577600979717403", caption: "", likes: "" },
   ],
   threads: [
-    { url: "https://www.threads.com/@duychinhdinhh/post/Der2hopjCeM", text: "Tap to read on Threads" },
-    { url: "https://www.threads.com/@duychinhdinhh/post/DeSGk5dCXgI", text: "Tap to read on Threads" },
+    {
+      url: "https://www.threads.com/@duychinhdinhh/post/Der2hopjCeM",
+      date: "2026-10-20", likes: "1.2K", replies: "42",
+      text: "Có ai mới sang UK mà thắc mắc tại sao cái máy giặt luôn nằm trong nhà bếp không?\nĐang xào nấu thơm lừng thì nghe tiếng máy giặt vắt quần áo rung cả sàn.\nTư duy thiết kế của tư bản khó hiểu thật sự =))",
+    },
+    {
+      url: "https://www.threads.com/@duychinhdinhh/post/DeSGk5dCXgI",
+      date: "2026-10-09", likes: "88", replies: "2",
+      text: "Hồi mới sang UK du học, rồi bắt đầu đi làm - mình thỉnh thoảng bị FOMO.\nThấy bạn bè check-in ăn hàng, du lịch châu Âu suốt, cũng chạnh lòng.\nNhưng ở London đủ lâu, đóng tiền nhà vài năm, mình nhận ra: Hạnh phúc không phải là mua đồ hiệu - mà là thẻ cuối tháng vẫn còn dư tiền, đi siêu thị nhặt đồ không cần nhìn giá.",
+    },
   ],
 };
+
+export const profile = { display: "Đinh Duy Chính", initials: "DC", threads: "duychinhdinhh", tiktok: "duychinhdinh", youtube: "DuyChinhDinh" };
 
 export const projects = [
   {
