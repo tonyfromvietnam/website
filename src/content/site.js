@@ -5,8 +5,36 @@ export const site = {
   tagline: "Build the bridge you wished you'd had.",
   intro:
     "CRM analyst in London and Computer Science graduate. I build small, honest tools for the problems I actually have, starting with my own recovery.",
+  oneLiner: "CRM analyst · CS graduate · London. I build tools for my own problems.",
   links: [{ label: "GitHub", href: "https://github.com/tonyfromvietnam" }],
   contact: "https://github.com/tonyfromvietnam", // swap for email or LinkedIn
+};
+
+// Profile links: an empty href shows as a dashed "add link" chip until filled in
+export const socials = [
+  { platform: "youtube", label: "YouTube", href: "" },
+  { platform: "tiktok", label: "TikTok", href: "" },
+  { platform: "threads", label: "Threads", href: "" },
+  { platform: "github", label: "GitHub", href: "https://github.com/tonyfromvietnam" },
+];
+
+// With a channel id (UC…), the newest video is pulled from YouTube's public feed every hour
+export const youtubeChannelId = "";
+
+// Pinned posts, newest first. id: YouTube video id or TikTok video id; Threads uses the post URL.
+// An empty id/url shows a placeholder tile.
+export const media = {
+  youtube: [{ id: "", title: "Latest video" }],
+  tiktok: [
+    { id: "", title: "TikTok" },
+    { id: "", title: "TikTok" },
+    { id: "", title: "TikTok" },
+    { id: "", title: "TikTok" },
+  ],
+  threads: [
+    { url: "", text: "Latest Threads post" },
+    { url: "", text: "Threads post" },
+  ],
 };
 
 export const projects = [
