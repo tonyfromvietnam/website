@@ -11,8 +11,8 @@ export const health = {
     63, 72, 78, 84, 76, 70, 66, 55, 62, 71, 79, 83, 80, 74, 82,
   ],
   metrics: [
-    { label: "HRV", unit: "ms", tone: "data", week: [64, 69, 71, 66, 73, 75, 78] },
-    { label: "Resting HR", unit: "bpm", tone: "data", week: [53, 52, 51, 52, 50, 49, 48] },
-    { label: "Sleep", unit: "h", tone: "amber", week: [6.4, 7.1, 6.8, 7.5, 6.9, 7.8, 7.2] },
+    { key: "hrv", label: "HRV", unit: "ms", tone: "data", week: [64, 69, 71, 66, 73, 75, 78] },
+    { key: "rhr", label: "Resting HR", unit: "bpm", tone: "data", week: [53, 52, 51, 52, 50, 49, 48] },
+    { key: "sleep", label: "Sleep", unit: "h", tone: "amber", week: [6.4, 7.1, 6.8, 7.5, 6.9, 7.8, 7.2] },
   ],
 };
