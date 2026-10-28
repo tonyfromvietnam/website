@@ -1,5 +1,5 @@
 import { site, projects, socials, media, profile, youtubeChannelId } from "@/content/site";
-import { health } from "@/content/health";
+import { liveHealth } from "@/lib/stats";
 import { latestYouTube } from "@/lib/youtube";
 import { tiktokCards } from "@/lib/social";
 import Effects from "@/components/Effects";
@@ -135,8 +135,11 @@ function ThreadsCard({ post, delay }) {
 export default async function Home() {
   const brand = site.shortName || site.name || "Build the bridge";
   const [p] = projects;
-  const { today, last30, metrics, example, updated } = health;
-  const avg = Math.round(last30.reduce((a, b) => a + b, 0) / last30.length);
+  // Live from CHINH when it's switched on, otherwise the example numbers in content/health.js
+  const { today, last30, metrics, example, updated, avg30 } = await liveHealth();
+  const scored = last30.filter((s) => s != null);
+  const avg = avg30 ?? Math.round(scored.reduce((a, b) => a + b, 0) / Math.max(1, scored.length));
+  const updatedLabel = updated && new Date(`${updated}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Europe/London" });
   // A pinned video wins; otherwise show the channel's newest upload
   const pinned = media.youtube.filter((v) => v.id);
   const [video] = pinned.length ? pinned : await latestYouTube(youtubeChannelId);
@@ -188,26 +191,30 @@ export default async function Home() {
 
           {/* Recovery */}
           <Tile id="body" delay={1} className="flex scroll-mt-24 flex-col items-center justify-center gap-5 p-7 col-span-2 lg:col-span-4 lg:row-span-2">
-            <Eyebrow>{example ? "Recovery · example" : "Recovery today"}</Eyebrow>
+            <Eyebrow>{example ? "Recovery · example" : `Recovery · ${updatedLabel}`}</Eyebrow>
             <Ring score={today.score} />
             <span className="rounded-[3px] border border-mint/30 bg-mint/[0.06] px-2.5 py-1 font-mono text-xs uppercase tracking-[0.1em] text-mint">{today.day}</span>
           </Tile>
 
           {/* Vitals */}
           {metrics.map((m, i) => {
-            const now = m.week.at(-1);
+            // Live data is a 7-day average (never one day's reading); the example shows its last day
+            const now = m.now ?? m.week.at(-1);
             return (
-              <Tile key={m.label} delay={2 + i} className="p-5 lg:col-span-3">
-                <Eyebrow>{m.label}</Eyebrow>
+              <Tile key={m.key} delay={2 + i} className="p-5 lg:col-span-3">
+                <Eyebrow>{m.label}{example ? "" : " · 7-day avg"}</Eyebrow>
                 <p className={`mt-2 font-mono text-3xl tabular-nums sm:text-4xl ${TONE[m.tone]}`}>
                   <span data-count={now}>{now}</span><span className="ml-1 text-sm text-muted">{m.unit}</span>
                 </p>
                 <div className="mt-3">
-                  {m.label === "Resting HR" ? <Heartbeat bpm={now} />
-                    : m.label === "Sleep" ? <Bars values={m.week} tone={m.tone} />
+                  {m.key === "rhr" ? <Heartbeat bpm={Math.round(now)} />
+                    : m.key === "sleep" ? <Bars values={m.week} tone={m.tone} />
                     : <Spark values={m.week} tone={m.tone} />}
                 </div>
-                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">{m.label === "Resting HR" ? `Live · ${now} bpm` : "7 days"}</p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                  {m.key === "rhr" ? `Beating at ${Math.round(now)} bpm` : "7 days"}
+                  {m.change != null && m.change !== 0 ? ` · ${m.change > 0 ? "+" : "−"}${Math.abs(m.change)} vs last week` : ""}
+                </p>
               </Tile>
             );
           })}
@@ -251,14 +258,14 @@ export default async function Home() {
             </div>
             <ol className="mt-5 grid grid-cols-10 gap-1.5" aria-label={`Daily recovery for 30 days, average ${avg}%`}>
               {last30.map((s, i) => (
-                <li key={i} title={`${i === last30.length - 1 ? "Today" : `${last30.length - 1 - i} days ago`}: ${s}%`}
-                  className="cell aspect-square rounded-[2px] bg-mint hover:outline hover:outline-1 hover:outline-offset-2 hover:outline-mint"
-                  style={{ "--i": i, "--o": 0.12 + Math.max(0, (s - 45) / 45) * 0.88 }}>
-                  <span className="sr-only">{s}%</span>
+                <li key={i} title={`${i === last30.length - 1 ? "Today" : `${last30.length - 1 - i} days ago`}: ${s == null ? "no data" : `${s}%`}`}
+                  className={`cell aspect-square rounded-[2px] hover:outline hover:outline-1 hover:outline-offset-2 hover:outline-mint ${s == null ? "border border-dashed border-edge bg-transparent" : "bg-mint"}`}
+                  style={{ "--i": i, "--o": s == null ? 1 : 0.12 + Math.max(0, (s - 45) / 45) * 0.88 }}>
+                  <span className="sr-only">{s == null ? "no data" : `${s}%`}</span>
                 </li>
               ))}
             </ol>
-            <p className="mt-auto pt-5 font-mono text-[11px] text-muted">{example ? "Example data" : `Updated ${updated}`} · via CHINH</p>
+            <p className="mt-auto pt-5 font-mono text-[11px] text-muted">{example ? "Example data" : `Live · updated ${updatedLabel}`} · via CHINH</p>
           </Tile>
 
           {/* YouTube */}
