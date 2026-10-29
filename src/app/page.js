@@ -9,6 +9,7 @@ import Clock from "@/components/Clock";
 import YouTubePlayer from "@/components/YouTubePlayer";
 import TikTokPlayer from "@/components/TikTokPlayer";
 import ThemeSwitch from "@/components/ThemeSwitch";
+import Ribbon from "@/components/Ribbon";
 
 const Eyebrow = ({ children, className = "text-muted", ...rest }) => (
   <p className={`font-mono text-[11px] uppercase tracking-[0.14em] ${className}`} {...rest}>{children}</p>
@@ -150,21 +151,12 @@ export default async function Home() {
     <div className="relative min-h-screen overflow-x-clip">
       <DotGrid />
       <Effects />
-      <header className="sticky top-0 z-20 border-b border-line bg-night/85 backdrop-blur-md">
-        <nav className="gutter mx-auto flex h-16 max-w-6xl items-center justify-between gap-4">
-          <a href="#top" className="flex items-center gap-2.5 font-display text-[15px] font-bold text-paper">
-            <span className="h-2 w-2 rounded-[2px] bg-mint" aria-hidden="true" />
-            {brand}
-          </a>
-          <div className="flex items-center gap-2 text-sm font-medium sm:gap-5">
-            <a href="#body" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Body</a>
-            <a href="#work" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Built</a>
-            <a href="#recent" className="hidden min-h-11 items-center text-muted hover:text-paper sm:inline-flex">Recently</a>
-            <ThemeSwitch fallback={site.theme || "sand"} />
-            <a href={site.contact} className="inline-flex min-h-11 items-center rounded-[4px] bg-paper px-4 font-semibold text-night transition hover:bg-mint">Connect</a>
-          </div>
-        </nav>
-      </header>
+      <Ribbon active="home" name={brand}>
+        <a href="#work" className="hidden min-h-11 items-center text-muted hover:text-paper lg:inline-flex">Built</a>
+        <a href="#recent" className="hidden min-h-11 items-center text-muted hover:text-paper lg:inline-flex">Recently</a>
+        <ThemeSwitch fallback={site.theme || "sand"} />
+        <a href={site.contact} className="hidden min-h-11 items-center rounded-[4px] bg-paper px-4 font-semibold text-night transition hover:bg-mint sm:inline-flex">Connect</a>
+      </Ribbon>
 
       <main id="top" className="gutter mx-auto max-w-6xl py-8 sm:py-12">
         <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-12">
