@@ -129,3 +129,12 @@ h1, h2, h3 { text-wrap: balance; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Signature logo: the PNG is only a mask, so it takes the text colour of whichever theme is on */
+.signature {
+  display: block; aspect-ratio: 903 / 306; background: currentColor;
+  -webkit-mask: url("/logo.png") center / contain no-repeat; mask: url("/logo.png") center / contain no-repeat;
+}
+
+/* Moving between the homepage and CHINH (same domain) cross-fades instead of flashing */
+@view-transition { navigation: auto; }
